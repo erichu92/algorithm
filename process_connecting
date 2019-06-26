@@ -1,0 +1,154 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#define P pair<int,int>
+using namespace std;
+#define NORTH 0
+#define EAST 1
+#define SOUTH 2
+#define WEST 3
+
+int n;
+int max_core = -1;
+int min_line = 144;
+vector<P> v;
+
+bool isline(int** g, int dir, int i, int j) { // if can connect   : return 1
+	switch (dir) {							  // if can't connect : return 0
+		case NORTH:
+			for (int k = i - 1; k >= 0; k--) {
+				if (g[k][j] != 0) {
+					return false;
+				}
+			}
+			return true;
+			break;
+		case EAST:
+			for (int k = j + 1; k <= n - 1; k++) {
+				if (g[i][k] != 0) {
+					return false;
+				}
+			}
+			return true;
+			break;
+		case SOUTH:
+			for (int k = i + 1; k <= n - 1; k++) {
+				if (g[k][j] != 0) {
+					return false;
+				}
+			}
+			return true;
+			break;
+		case WEST:
+			for (int k = j - 1; k >= 0; k--) {
+				if (g[i][k] != 0) {
+					return false;
+				}
+			}
+			return true;
+			break;
+	}
+}
+
+int drawline(int**g, int dir, int i, int j, int flags) { // write "2" at entry
+	int count = 0;										 // which is on direction of the core
+	switch (dir) {										 // And return the length of wire
+	case NORTH:
+		while (i > 0) {
+			g[--i][j] = flags ? 2 : 0;
+			count++;
+		}
+		break;
+	case EAST:
+		while (j < n - 1) {
+			g[i][++j] = flags ? 2 : 0;
+			count++;
+		}
+		break;
+	case SOUTH:
+		while (i < n - 1) {
+			g[++i][j] = flags ? 2 : 0;
+			count++;
+		}
+		break;
+	case WEST:
+		while (j > 0) {
+			g[i][--j] = flags ? 2 : 0;
+			count++;
+		}
+		break;
+	}
+
+	return count;
+}
+
+void DFS(int** g, vector<P> &core, int index, int num_core, int num_line) {
+
+	if (max_core > int(core.size()) - index + num_core) { // check as many as possible core number
+		return;											  // if it is smaller -> return!
+	}
+	if (index == core.size()) {							  // Finish searching core
+		if (max_core < num_core) {						  // Update
+			max_core = num_core;
+			min_line = num_line;
+		}
+		else if(max_core == num_core){
+			if (min_line > num_line) {
+				min_line = num_line;
+			}
+		}
+	}
+
+	else {
+
+		for (int i = 0; i < 4; i++) {											// check 4 directions of each core
+			if (isline(g, i, core[index].first, core[index].second)) {			// if return is 1, drawline!
+				DFS(g, core, index + 1, num_core + 1, num_line + drawline(g, i, core[index].first, core[index].second, 1));
+				drawline(g, i, core[index].first, core[index].second, 0);		// Erase previous Drawline!
+			}
+		}
+		DFS(g, core, index + 1, num_core, num_line); // Not Connecting Case
+	}
+
+}
+
+int main() {
+	int T;
+	cin >> T;
+
+	int* ans = new int[T];
+
+	for (int p = 0; p < T; p++) {
+		cin >> n;
+		int** map = new int*[n];
+		for (int i = 0; i < n; i++) {
+			map[i] = new int[n];
+		}
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				cin >> map[i][j];					// Map of the core
+				if (map[i][j] && i != 0 && i != n - 1 && j != 0 && j != n - 1) {
+					v.push_back(P(i, j));			// Cores we need to check
+				}									// except the core at the edge
+			}
+		}
+
+		DFS(map, v, 0, 0, 0);
+
+		ans[p] = min_line;
+
+		for (int m = 0; m < n; m++) {				// Re-Initialize the Global Variables and Delete Dynamic Allocations
+			delete[] map[m];
+		}
+		delete[] map;
+		v.clear();
+		max_core = -1;
+		min_line = 144;
+	}
+
+	for (int i = 0; i < T; i++) {
+		printf("#%d %d\n", i+1, ans[i]);
+	}
+
+	delete[] ans;	
+}
