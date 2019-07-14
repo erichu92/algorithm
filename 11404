@@ -1,0 +1,45 @@
+#include <stdio.h>
+using namespace std;
+
+int map[101][101] = { 0 }; // Cost Array!
+int n, m;				   // input n,m value
+int min = 10000001;		   // min value
+
+void floyd() {											// Floyd-Warshall Algorithms ( O(n^3) Algorithm )
+	for (int via = 1; via < n + 1; via++) {				// Check 1 to n via points.
+		for (int i = 1; i < n + 1; i++) {				// Starting point i
+			if (map[i][via] == 0) {						// if there is no bus from i to via.
+				continue;
+			}
+			for (int j = 1; j < n + 1; j++) {			// Destination j
+				if (i == j || map[via][j] == 0) {
+					continue;
+				}
+				if (map[i][j] == 0 || map[i][j] > map[i][via] + map[via][j]) { // Compare the cost and update minimum value at map
+					map[i][j] = map[i][via] + map[via][j];
+				}
+			}
+		}
+	}
+}
+
+int main() {
+	scanf("%d %d", &n, &m);
+
+	for (int i = 0; i < m; i++) {
+		int a, b, c;
+		scanf("%d %d %d", &a, &b, &c);
+		if (map[a][b] == 0 || map[a][b] > c) {
+			map[a][b] = c;
+		}
+	}
+
+	floyd();
+
+	for (int i = 1; i < n + 1; i++) {
+		for (int j = 1; j < n + 1; j++) {
+			printf("%d ", map[i][j]);
+		}
+		printf("\n");
+	}
+}
