@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include <vector>
+#include <queue>
+#include <string>
+#define P pair<int,int>
+#define INF 300001
+#define MAX 20001
+using namespace std;
+
+int V, E; // 1<= V <= 20,000 , 1<= E <= 300,000
+vector<P> graph[MAX];
+
+int* Dijkstra(int s, int num) {
+	int* ans = new int[V + 1];
+	for (int i = 0; i < V + 1; i++) {
+		ans[i] = INF;
+	}
+	ans[s] = 0;
+
+	priority_queue<P> pq;
+
+	pq.push({ 0,s });
+
+	while (!pq.empty()) {
+		int dist = -pq.top().first;
+		int cur = pq.top().second;
+		pq.pop();
+
+		if (dist > ans[cur]) {
+			continue;
+		}
+
+		for (int i = 0; i < graph[cur].size(); i++) {
+			int neighbor = graph[cur].at(i).first;
+			int neighbor_dist = dist + graph[cur].at(i).second;
+
+			if (neighbor_dist < ans[neighbor]) {
+				ans[neighbor] = neighbor_dist;
+				pq.push({ -neighbor_dist, neighbor });
+			}
+		}
+	}
+	return ans;
+}
+
+int main() {
+	scanf("%d %d", &V, &E);
+	int start;
+	scanf("%d", &start);
+
+	for (int i = 0; i < E; i++) {
+		int u, v, w;
+		scanf("%d %d %d", &u, &v, &w);
+		graph[u].push_back({ v,w });
+	}
+
+	int *ans = Dijkstra(start, V);
+
+	for (int i = 1; i <= V; i++) {
+		if (ans[i] == INF) {
+			printf("INF\n");
+		}
+		else {
+			printf("%d\n", ans[i]);
+		}
+	}
+}
