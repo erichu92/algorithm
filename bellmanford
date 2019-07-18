@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <vector>
+#include <algorithm>
+using namespace std;
+#define INF 87654321
+#define P pair<int,int>
+#define MAX 501
+int N, M;
+
+vector<P> map[MAX];
+int dist[MAX];
+
+int main() {
+	scanf("%d %d", &N, &M);
+
+	for (int i = 0; i <= MAX; i++) {
+		dist[i] = INF;
+	}
+	dist[1] = 0;
+
+	for (int i = 0; i < M; i++) {
+		int a, b, c;
+		//bool check = false;
+		//int tmp;
+		scanf("%d %d %d", &a, &b, &c);
+		/*
+		for (int j = 0; j < map[a].size(); j++) {
+			if (map[a].at(j).first == b && map[a].at(j).second < c) {
+				check = true;
+				tmp = map[a].at(j).second;
+				map[a].at(j).second = c;
+			}
+		}
+		if (check) {
+			map[a].push_back({ b,tmp });
+			continue;
+		}
+		*/
+		map[a].push_back({ b,c });
+	}
+
+	bool cycle = false;
+
+	for (int i = 1; i <= N; i++) {
+		for (int j = 1; j <= N; j++) {
+			for (int k = 0; k < map[j].size(); k++) {
+				int neighbor = map[j].at(k).first;
+				int neighbor_dist = map[j].at(k).second;
+				if (dist[j] + neighbor_dist < dist[neighbor] && dist[j] != INF) {
+					dist[neighbor] = dist[j] + neighbor_dist;
+					if (i == N) {
+						cycle = true;
+					}
+				}
+
+			}
+		}
+	}
+
+	if (cycle) {
+		printf("-1\n");
+	}
+	else {
+		for (int i = 2; i <= N; i++) {
+			if (dist[i] == INF) {
+				printf("-1\n", -1);
+			}
+			else {
+				printf("%d\n", dist[i]);
+			}
+		}
+	}
+}
