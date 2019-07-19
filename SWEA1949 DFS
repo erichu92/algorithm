@@ -1,0 +1,103 @@
+#include <stdio.h>
+#include <vector>
+#pragma warning(disable: 4996)
+using namespace std;
+
+int map[8][8];
+int visit[8][8];
+int N, K;
+int max_path = 0;
+
+int dir_x[4] = { -1,0,1,0 };
+int dir_y[4] = { 0,1,0,-1 };
+
+void DFS(int x, int y, int dig, int path) {
+	int dx, dy;
+	int end = 0;
+	
+	visit[x][y] = 1;
+	/*
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			if (i == x && j == y) {
+				printf("0 ");
+				continue;
+			}
+			printf("%d ", map[i][j]);
+		}
+		printf("\n");
+	}
+	printf("%d\n", path);
+	*/
+	for (int i = 0; i < 4; i++) {
+		dx = dir_x[i];
+		dy = dir_y[i];
+		if (0 <= x + dx && x + dx < N && 0 <= y + dy && y + dy < N) {
+			if (map[x + dx][y + dy] < map[x][y] && !visit[x+dx][y+dy]) {
+				DFS(x + dx, y + dy, dig, path + 1);
+				visit[x + dx][y + dy] = 0;
+			}
+			else if ((map[x + dx][y + dy] - K < map[x][y]) && dig && !visit[x+dx][y+dy]) {
+				int tmp = map[x + dx][y + dy];
+				map[x + dx][y + dy] = map[x][y] - 1;
+				DFS(x + dx, y + dy, 0, path + 1);
+				visit[x + dx][y + dy] = 0;
+				map[x + dx][y + dy] = tmp;
+			}
+		}
+	}
+
+	for (int i = 0; i < 4; i++) {
+		dx = dir_x[i];
+		dy = dir_y[i];
+		if (0 <= x + dx && x + dx < N && 0 <= y + dy && y + dy < N) {
+			if (map[x][y] > map[x + dx][y + dy]) {
+				end++;
+			}
+		}
+	}
+	if (end == 0) {
+		if (path > max_path) {
+			max_path = path;
+			printf("Update : %d %d %d\n", x, y, max_path);
+		}
+	}
+}
+
+int main() {
+	int T;
+	vector<int> ans;
+	scanf("%d", &T);
+
+	while (T > 0) {
+		int max = 0;
+		scanf("%d %d", &N, &K);
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				visit[i][j] = 0;
+				scanf("%d", &map[i][j]);
+				if (map[i][j] > max) {
+					max = map[i][j];
+				}
+			}
+		}
+
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				if (map[i][j] == max) {
+					printf("start : %d %d\n", i, j);
+					DFS(i, j, 1, 1);
+					visit[i][j] = 0;
+				}
+			}
+		}
+
+		ans.push_back(max_path);
+		max_path = 0;
+		T--;
+	}
+
+	for (int i = 0; i < ans.size(); i++) {
+		printf("#%d %d\n", i + 1, ans.at(i));
+	}
+}
